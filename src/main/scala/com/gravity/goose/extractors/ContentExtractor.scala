@@ -25,7 +25,7 @@ import java.util.ArrayList
 import java.util.Date
 import scala.collection.mutable
 import scala.collection.JavaConversions._
-import org.jsoup.nodes.{Attributes, Element, Document}
+import org.jsoup.nodes.{Attributes, Element, Document, Node}
 import org.jsoup.select._
 
 /**
@@ -676,17 +676,23 @@ trait ContentExtractor {
   }
 
   def walkSiblings[T](node: Element)(work: (Element) => T): Seq[T] = {
-    var currentSibling: Element = node.previousElementSibling
+    var currentSibling: Node = node.previousSibling
     val b = mutable.Buffer[T]()
 
     while (currentSibling != null) {
 
-      trace(logPrefix + "SIBLINGCHECK: " + debugNode(currentSibling))
-      b += work(currentSibling)
+      //trace(logPrefix + "SIBLINGCHECK: " + debugNode(currentSibling))
+      currentSibling match {
+        case x:Element => {
+	  b += work(x)
+	}
+	case _ => {}
+      }
 
-      currentSibling = if (currentSibling != null) currentSibling.previousElementSibling else null
+      currentSibling = if (currentSibling != null) currentSibling.previousSibling else null
     }
     b
+
   }
 
   private def addSiblings(topNode: Element): Element = {
